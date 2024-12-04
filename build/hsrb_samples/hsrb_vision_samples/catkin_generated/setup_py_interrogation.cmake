@@ -1,0 +1,7 @@
+set(hsrb_vision_samples_SETUP_PY_SETUP_MODULE "distutils.core")
+set(hsrb_vision_samples_SETUP_PY_VERSION "0.8.0")
+set(hsrb_vision_samples_SETUP_PY_SCRIPTS "")
+set(hsrb_vision_samples_SETUP_PY_PACKAGES "hsrb_vision_samples")
+set(hsrb_vision_samples_SETUP_PY_PACKAGE_DIRS "src/hsrb_vision_samples")
+set(hsrb_vision_samples_SETUP_PY_MODULES "")
+set(hsrb_vision_samples_SETUP_PY_MODULE_DIRS "")

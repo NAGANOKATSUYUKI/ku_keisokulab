@@ -1,0 +1,8 @@
+prefix=/home/keisoku/catkin_ws/install
+
+Name: hsrb_motion_samples
+Description: Description of hsrb_motion_samples
+Version: 0.8.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: actionlib control_msgs controller_manager_msgs roscpp rospy tmc_control_msgs trajectory_msgs

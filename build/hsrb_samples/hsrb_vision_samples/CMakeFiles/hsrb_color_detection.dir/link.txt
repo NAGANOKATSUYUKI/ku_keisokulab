@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC   -O3 -DNDEBUG   -shared -Wl,-soname,libhsrb_color_detection.so -o /home/keisoku/catkin_ws/devel/lib/libhsrb_color_detection.so CMakeFiles/hsrb_color_detection.dir/src/color_detection.cpp.o 

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>hsrb_web_user_interface_samples</name>
+  <version>0.8.0</version>
+  <description>Web user interface samples using roslibjs</description>
+  <maintainer email="yuka_hashiguchi@mail.toyota.co.jp">Yuka Hashiguchi</maintainer>
+
+  <license>TMC</license>
+
+  <author>Noriyuki Suzuki</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>

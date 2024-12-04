@@ -1,0 +1,8 @@
+prefix=/home/keisoku/catkin_ws/devel
+
+Name: hsrb_vision_samples
+Description: Description of hsrb_vision_samples
+Version: 0.8.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: cv_bridge image_transport roscpp sensor_msgs

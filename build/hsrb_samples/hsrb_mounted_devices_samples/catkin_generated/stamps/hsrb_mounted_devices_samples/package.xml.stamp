@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>hsrb_mounted_devices_samples</name>
+  <version>0.8.0</version>
+  <description>Samples using devices mounted on HSRB</description>
+  <maintainer email="yuka_hashiguchi@mail.toyota.co.jp">Yuka Hashiguchi</maintainer>
+
+  <license>TMC</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>actionlib</depend>
+  <depend>actionlib_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>tmc_control_msgs</depend>
+  <depend>tmc_manipulation_msgs</depend>
+  <depend>tmc_msgs</depend>
+  <depend>tmc_suction</depend>
+
+  <exec_depend>rospy</exec_depend>
+
+  <test_depend condition="$ROS_PYTHON_VERSION == 2">python-mock</test_depend>
+  <test_depend condition="$ROS_PYTHON_VERSION == 3">python3-mock</test_depend>
+  <test_depend>rosgraph_msgs</test_depend>
+  <test_depend>rostest</test_depend>
+</package>

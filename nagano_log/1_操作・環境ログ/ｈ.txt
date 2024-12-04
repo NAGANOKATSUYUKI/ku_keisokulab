@@ -1,0 +1,23 @@
+isoku-ZL7C-R37TH:~/pytorch-CycleGAN-and-pix2pix$ pip show torch torchvision
+Name: torch
+Version: 2.4.1
+Summary: Tensors and Dynamic neural networks in Python with strong GPU acceleration
+Home-page: https://pytorch.org/
+Author: PyTorch Team
+Author-email: packages@pytorch.org
+License: BSD-3
+Location: /home/keisoku/.local/lib/python3.8/site-packages
+Requires: nvidia-cuda-cupti-cu12, nvidia-curand-cu12, networkx, triton, typing-extensions, filelock, nvidia-cudnn-cu12, jinja2, nvidia-cusolver-cu12, fsspec, nvidia-cuda-runtime-cu12, nvidia-cusparse-cu12, nvidia-nvtx-cu12, nvidia-cuda-nvrtc-cu12, nvidia-nccl-cu12, nvidia-cufft-cu12, nvidia-cublas-cu12, sympy
+Required-by: torchvision, timm, pretrainedmodels, efficientnet-pytorch
+---
+Name: torchvision
+Version: 0.18.1
+Summary: image and video datasets and models for torch deep learning
+Home-page: https://github.com/pytorch/vision
+Author: PyTorch Core Team
+Author-email: soumith@pytorch.org
+License: BSD
+Location: /home/keisoku/.local/lib/python3.8/site-packages
+Requires: torch, pillow, numpy
+Required-by: timm, segmentation-models-pytorch, pretrainedmodels
+

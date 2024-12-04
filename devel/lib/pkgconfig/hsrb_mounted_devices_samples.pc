@@ -1,0 +1,8 @@
+prefix=/home/keisoku/catkin_ws/devel
+
+Name: hsrb_mounted_devices_samples
+Description: Description of hsrb_mounted_devices_samples
+Version: 0.8.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: actionlib actionlib_msgs geometry_msgs sensor_msgs std_msgs tmc_control_msgs tmc_manipulation_msgs tmc_msgs tmc_suction

@@ -1,0 +1,8 @@
+prefix=/home/keisoku/catkin_ws/install
+
+Name: hsrb_web_user_interface_samples
+Description: Description of hsrb_web_user_interface_samples
+Version: 0.8.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

@@ -1,0 +1,8 @@
+prefix=/home/keisoku/catkin_ws/devel
+
+Name: sample
+Description: Description of sample
+Version: 0.0.0
+Cflags: -I/home/keisoku/catkin_ws/devel/include
+Libs: -L${prefix}/lib 
+Requires: message_runtime rospy std_msgs

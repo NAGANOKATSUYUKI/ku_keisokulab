@@ -1,0 +1,7 @@
+set(hsrb_mounted_devices_samples_SETUP_PY_SETUP_MODULE "distutils.core")
+set(hsrb_mounted_devices_samples_SETUP_PY_VERSION "0.8.0")
+set(hsrb_mounted_devices_samples_SETUP_PY_SCRIPTS "")
+set(hsrb_mounted_devices_samples_SETUP_PY_PACKAGES "hsrb_mounted_devices_samples")
+set(hsrb_mounted_devices_samples_SETUP_PY_PACKAGE_DIRS "src/hsrb_mounted_devices_samples")
+set(hsrb_mounted_devices_samples_SETUP_PY_MODULES "")
+set(hsrb_mounted_devices_samples_SETUP_PY_MODULE_DIRS "")
