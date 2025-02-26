@@ -1,0 +1,8 @@
+prefix=/home/keisoku/catkin_ws/install
+
+Name: usb-camera
+Description: Description of usb-camera
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

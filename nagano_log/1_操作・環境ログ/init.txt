@@ -1,0 +1,36 @@
+イントール手順
+chrome
+vscode
+・nvidia550-server
+sudo apt install nvidia-utils-550-server
+sudo apt install nvidia-driver-550-server
+cuda12.4---cuda-repo-ubuntu2004-12-4-local_12.4.0-550.54.14-1_amd64.deb
+cudnn---cudnn-local-repo-ubuntu2004-9.7.0_1.0-1_amd64.deb
+pytouch12.4
+ros_noetic
+hsr_pkgインストール
+realsenseインストール
+
+
+#python3_version変換
+sudo update-alternatives --config python3
+3.8で十分
+
+#ターミナルbash再読込
+source ~/.bashrc
+
+keisoku@keisoku-R5-RL5:~$ python3
+Python 3.8.10 (default, Feb  4 2025, 15:02:54) 
+[GCC 9.4.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import torch
+>>> print(torch.backends.cudnn.version())
+KeyboardInterrupt
+>>> print(torch.backends.cudnn.enabled)
+True
+>>> print(torch.backends.cudnn.version())
+90100
+>>> print(torch.cuda.is_available())
+True
+>>> 
+

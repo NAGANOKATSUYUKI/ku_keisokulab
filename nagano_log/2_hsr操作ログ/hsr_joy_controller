@@ -1,0 +1,107 @@
+# for pattern1
+/hsrb/interactive_teleop_joy:
+  hsrb_autocharge_enable_joystick_control/button_index: 0
+  hsrb_autocharge_select_joystick_control/button_index: 9
+  hsrb_base_fast_enable_joystick_control/button_index: 8
+  hsrb_base_joystick_control/axis/yaw: 2
+  hsrb_base_fast_joystick_control/axis/yaw: 2
+  hsrb_endeffector_joystick_control/axis/z: 3
+  hsrb_endeffector_with_base_enable_joystick_control/button_index: 9
+  hsrb_endeffector_with_base_joystick_control/axis/z: 3
+  hsrb_hand_select_joystick_control/button_index: 2
+  hsrb_init_pose_select_joystick_control/button_index: 3
+  hsrb_poses_enable_joystick_control/button_index: 0
+  hsrb_pickup1_pose_select_joystick_control/button_index: 14
+  hsrb_pickup2_pose_select_joystick_control/button_index: 12
+  hsrb_servo_enable_joystick_control/button_index: 0
+  hsrb_servo_select_joystick_control/button_index: 16
+  hsrb_suction_pose_select_joystick_control/button_index: 13
+  hsrb_suction_select_joystick_control/button_index: 1
+  hsrb_L1_enable_joystick_control/button_index: 10
+  hsrb_R1_enable_joystick_control/button_index: 11
+  hsrb_L1_button_joint_joystick_control:
+    - {button: 13, joint: head_pan_joint, ratio: -0.5}
+    - {button: 15, joint: head_pan_joint, ratio: 0.5}
+    - {button: 12, joint: head_tilt_joint, ratio: 0.5}
+    - {button: 14, joint: head_tilt_joint, ratio: -0.5}
+    - {button: 4, joint: arm_lift_joint, ratio: 0.5}
+    - {button: 6, joint: arm_lift_joint, ratio: -0.5}
+    - {button: 5, joint: wrist_roll_joint, ratio: 0.8}
+    - {button: 7, joint: wrist_roll_joint, ratio: -0.8}
+  hsrb_R1_button_joint_joystick_control:
+    - {button: 13, joint: arm_roll_joint, ratio: -0.5}
+    - {button: 15, joint: arm_roll_joint, ratio: 0.5}
+    - {button: 12, joint: arm_flex_joint, ratio: 0.5}
+    - {button: 14, joint: arm_flex_joint, ratio: -0.5}
+    - {button: 4, joint: wrist_flex_joint, ratio: 0.5}
+    - {button: 6, joint: wrist_flex_joint, ratio: -0.5}
+    - {button: 5, joint: hand_motor_joint, ratio: 0.8}
+    - {button: 7, joint: hand_motor_joint, ratio: -0.8}
+
+# for pattern2
+/hsrb/joystick_control/controls/:
+  arm_control:
+    button: 14
+  arm_control_fast:
+    button: [14, 8]
+  autocharge_control:
+    button: 9
+    enable_button: 0
+  base_control:
+    axis/yaw: 2
+    button: 10
+  base_control_fast:
+    axis/yaw: 2
+    button: [10, 8]
+  dynamic_storage_pose:
+    button: 11
+    enable_button: 0
+    pose_save_button: 3
+  drive_power_control:
+    button: 16
+    enable_button: 0
+  endeffector_control:
+    axis/z: 3
+    button: 11
+    hand_with_base_button: 9
+  endeffector_control_fast:
+    axis/z: 3
+    button: [11, 8]
+    hand_with_base_button: 9
+  grasp_pose:
+    button: 15
+    enable_button: 0
+  gripper_control:
+    button: 9
+    hand_motor_joint/axis: 2
+  gripper_control_fast:
+    button: [9, 8]
+    hand_motor_joint/axis: 2
+  hand_control:
+    button: 2
+    force_enable_button: 9
+  head_control:
+    button: 12
+  head_control_fast:
+    button: [12, 8]
+  init_pose:
+    button: 3
+  lift_control:
+    button: 15
+  lift_control_fast:
+    button: [15, 8]
+  pickup1_pose:
+    button: 12
+    enable_button: 0
+  pickup2_pose:
+    button: 14
+    enable_button: 0
+  suction_control:
+    button: 1
+  suction_pose:
+    button: 13
+    enable_button: 0
+  wrist_control:
+    button: 13
+  wrist_control_fast:
+    button: [13, 8]

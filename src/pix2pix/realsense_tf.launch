@@ -1,0 +1,12 @@
+<launch>
+
+  <!--<node pkg="tf" type="static_transform_publisher" name="map_odom_broadcaster" args="0 0 0 0 0 0 odom /map 10" />-->
+  <!-- <node pkg="tf" type="static_transform_publisher" name="" args="x y z r p y 親フレーム 子フレーム 10Hz" -->
+
+  <!--HSR_realsense-->
+  <node pkg="tf" type="static_transform_publisher" name="realsense_camera_tf" args="0.03 0.08 0.04 3.14 -1.57 -1.57 head_rgbd_sensor_link camera_link 10" />
+  <!--realsense only-->
+  <!-- <node pkg="tf" type="static_transform_publisher" name="realsense_camera_tf" args="0.1 0 0 0 0 0 odom camera_link 10" />  -->
+
+
+</launch>

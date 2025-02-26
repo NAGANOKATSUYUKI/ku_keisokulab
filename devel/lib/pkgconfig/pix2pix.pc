@@ -1,0 +1,8 @@
+prefix=/home/keisoku/catkin_ws/devel
+
+Name: pix2pix
+Description: Description of pix2pix
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

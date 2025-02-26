@@ -1,0 +1,8 @@
+prefix=/home/keisoku/catkin_ws/devel
+
+Name: rs_cam
+Description: Description of rs_cam
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

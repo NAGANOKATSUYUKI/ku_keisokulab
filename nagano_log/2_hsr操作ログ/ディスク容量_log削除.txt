@@ -1,0 +1,145 @@
+・HSRの画面上にディスク容量不足と通知が来るとき
+
+ 中身を確認して古いものを削除する
+ cd /var/log/ros
+ ls
+ ・例
+ sudo rm -R 202303* 202304*　--> "202303"と"202304"の文字を含むディレクトリを削除
+ 
+-------------------------------------------------------------------------------------------------------------------------------------------------
+ 20231122の時の容量
+・cd /var/log/journal/
+・journalctl --disk-usage
+ Archived and active journals take up 4.6G in the file system.
+ 
+ ・sudo du -sh /var/*
+5.9M	/var/backups
+175M	/var/cache
+4.0K	/var/crash
+22G	/var/lib
+4.0K	/var/local
+0	/var/lock
+5.4G	/var/log
+4.0K	/var/mail
+4.0K	/var/metrics
+4.0K	/var/opt
+0	/var/run
+27M	/var/snap
+40K	/var/spool
+64K	/var/tmp
+----------------------------------------------
+ ・sudo du -sh /var/lib/*
+28K	/var/lib/AccountsService
+4.0K	/var/lib/acpi-support
+24K	/var/lib/alsa
+20M	/var/lib/app-info
+8.0K	/var/lib/apport
+223M	/var/lib/apt
+4.0K	/var/lib/aptitude
+4.1M	/var/lib/aspell
+4.0K	/var/lib/avahi-autoipd
+12K	/var/lib/binfmts
+12K	/var/lib/bluetooth
+4.0K	/var/lib/boltd
+4.0K	/var/lib/BrlAPI
+8.0K	/var/lib/chrony
+56K	/var/lib/colord
+3.0M	/var/lib/command-not-found
+1000K	/var/lib/containerd
+4.0K	/var/lib/couchdb
+4.0K	/var/lib/dbus
+4.0K	/var/lib/dhcp
+12K	/var/lib/dictionaries-common
+280K	/var/lib/dkms
+16G	/var/lib/docker
+4.0K	/var/lib/docker.hsrb.hmi
+79M	/var/lib/dpkg
+24K	/var/lib/emacsen-common
+4.0K	/var/lib/fprint
+60K	/var/lib/fwupd
+32K	/var/lib/gdm3
+8.0K	/var/lib/gems
+4.0K	/var/lib/geoclue
+36K	/var/lib/ghostscript
+4.0K	/var/lib/git
+16K	/var/lib/grub
+4.0K	/var/lib/hp
+4.0K	/var/lib/ieee-data
+12K	/var/lib/initramfs-tools
+8.0K	/var/lib/ispell
+5.3M	/var/lib/lightdm
+16K	/var/lib/lightdm-data
+12K	/var/lib/locales
+8.0K	/var/lib/logrotate
+4.0K	/var/lib/man-db
+4.0K	/var/lib/misc
+92K	/var/lib/NetworkManager
+12K	/var/lib/openvpn
+4.0K	/var/lib/os-prober
+36K	/var/lib/PackageKit
+28K	/var/lib/pam
+8.0K	/var/lib/plymouth
+64K	/var/lib/polkit-1
+4.0K	/var/lib/private
+12K	/var/lib/pulse
+4.0K	/var/lib/python
+12K	/var/lib/sgml-base
+8.0K	/var/lib/sixad
+6.0G	/var/lib/snapd
+4.0K	/var/lib/snmp
+8.0K	/var/lib/sudo
+640K	/var/lib/systemd
+4.0K	/var/lib/tpm
+4.0K	/var/lib/ubiquity
+4.0K	/var/lib/ubuntu-advantage
+8.0K	/var/lib/ubuntu-drivers-common
+4.0K	/var/lib/ubuntu-release-upgrader
+136K	/var/lib/ucf
+8.0K	/var/lib/udisks2
+4.0K	/var/lib/unattended-upgrades
+4.0K	/var/lib/update-manager
+44K	/var/lib/update-notifier
+52K	/var/lib/upower
+4.0K	/var/lib/usb_modeswitch
+608K	/var/lib/usbutils
+8.0K	/var/lib/vim
+4.0K	/var/lib/whoopsie
+8.0K	/var/lib/xfonts
+8.0K	/var/lib/xkb
+32K	/var/lib/xml-core
+-------------------------------------------------
+・sudo du -sh /var/lib/snapd/*
+1.3M	/var/lib/snapd/apparmor
+688K	/var/lib/snapd/assertions
+4.0K	/var/lib/snapd/auto-import
+1.3G	/var/lib/snapd/cache
+48K	/var/lib/snapd/cookie
+12K	/var/lib/snapd/dbus-1
+32K	/var/lib/snapd/desktop
+12K	/var/lib/snapd/device
+4.0K	/var/lib/snapd/environment
+24K	/var/lib/snapd/errtracker.db
+4.0K	/var/lib/snapd/features
+4.0K	/var/lib/snapd/firstboot
+4.0K	/var/lib/snapd/hostfs
+4.0K	/var/lib/snapd/inhibit
+20K	/var/lib/snapd/lib
+28K	/var/lib/snapd/mount
+728K	/var/lib/snapd/seccomp
+1.2G	/var/lib/snapd/seed
+52K	/var/lib/snapd/sequence
+3.6G	/var/lib/snapd/snaps
+8.0K	/var/lib/snapd/ssl
+48K	/var/lib/snapd/state.json
+0	/var/lib/snapd/state.lock
+4.0K	/var/lib/snapd/system-key
+4.0K	/var/lib/snapd/system-params
+4.0K	/var/lib/snapd/void
+-------------------------------------------------
+
+
+・消してはいけないもの
+sudo rm -R 659a4c6e553b494f9510dcc33a791159/
+
+https://docs.hsr.io/hsrc_user_manual/howto/clean_install.html
+6.4.4
