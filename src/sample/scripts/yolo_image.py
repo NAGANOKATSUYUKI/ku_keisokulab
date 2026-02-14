@@ -1,109 +1,147 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# YOLOの検出信頼度計測
 
-import rospy
-from sensor_msgs.msg import Image
-from geometry_msgs.msg import Point
-from darknet_ros_msgs.msg import BoundingBoxes, BoundingBox
-from cv_bridge import CvBridge, CvBridgeError
-import cv2
-import os
+"""YOLO検出結果の信頼度を画像・CSVに保存するノード。"""
+
 import csv
+import os
+import cv2
+import rospy
+from cv_bridge import CvBridge, CvBridgeError
+from darknet_ros_msgs.msg import BoundingBoxes
+from geometry_msgs.msg import Point
+from sensor_msgs.msg import Image
 
-class Detector():
+# ===== 設定（最初に編集する場所）=====
+NODE_NAME = "Point_head_topic"
+PUB_THRESHOLD_PARAM = "~pub_threshold"
+DEFAULT_PUB_THRESHOLD = 0.1
+
+IMAGE_TOPIC = "/z/image2movie_infra"  # 検出対象画像を受信するトピック
+BBOX_TOPIC = "/darknet_ros/bounding_boxes"  # YOLOのバウンディングボックス結果を受信するトピック
+POINT_TOPIC = "point_head_topic"  # 互換維持用のPoint publishトピック
+QUEUE_SIZE = 10
+IMAGE_ENCODING = "bgr8"
+
+SAVE_DIR = "/home/keisoku/20250310"
+CSV_FILE_DETECTION = os.path.join(SAVE_DIR, "detection_data.csv")
+CSV_FILE_COUNT = os.path.join(SAVE_DIR, "detection_count.csv")
+WINDOW_NAME = "Detection Image"
+TARGET_CLASSES = ("bottle", "cup", "bowl")
+
+
+class Detector:
+    """画像受信時に最新bboxを重畳して保存する。"""
+
     def __init__(self):
-        rospy.init_node("Point_head_topic")
+        rospy.init_node(NODE_NAME)
         self.cv_bridge = CvBridge()
-        self.bbox = BoundingBox()
-        self.m_pub_threshold = rospy.get_param("~pub_threshold", 0.1)
-        self.pub = rospy.Publisher("point_head_topic", Point, queue_size=10)
+        self.m_pub_threshold = rospy.get_param(PUB_THRESHOLD_PARAM, DEFAULT_PUB_THRESHOLD)
+        self.pub = rospy.Publisher(POINT_TOPIC, Point, queue_size=QUEUE_SIZE)
+
         self.image_number = 0
         self.bbox_list = []
+        self.save_dir = SAVE_DIR
 
-        sub_cam_depth = rospy.Subscriber("/z/generated_image", Image, self.ImageCallback)
-        sub_darknet_bbox = rospy.Subscriber("/darknet_ros/bounding_boxes", BoundingBoxes, self.DarknetBboxCallback)
+        os.makedirs(self.save_dir, exist_ok=True)
+        self.initialize_csv_files()
 
-        # CSVファイルの初期化
-        self.csv_file1 = "/home/keisoku/20241220/detection_data.csv"
-        self.csv_file2 = "/home/keisoku/20241220/detection_count.csv"
-        # ディレクトリが存在しない場合は作成
-        os.makedirs(os.path.dirname(self.csv_file1), exist_ok=True)
-        os.makedirs(os.path.dirname(self.csv_file2), exist_ok=True)
-        
-        with open(self.csv_file1, 'w', newline='') as file1:
+        self.sub_cam_depth = rospy.Subscriber(IMAGE_TOPIC, Image, self.image_callback)
+        self.sub_darknet_bbox = rospy.Subscriber(
+            BBOX_TOPIC, BoundingBoxes, self.darknet_bbox_callback
+        )
+
+    def initialize_csv_files(self):
+        """出力CSVをヘッダー付きで初期化する。"""
+        with open(CSV_FILE_DETECTION, "w", newline="") as file1:
             writer = csv.writer(file1)
             writer.writerow(["Image Number", "Class", "Probability"])
-        with open(self.csv_file2, 'w', newline='') as file2:
+
+        with open(CSV_FILE_COUNT, "w", newline="") as file2:
             writer = csv.writer(file2)
-            writer.writerow(["Image Number", "Total Objects", "Bottle Count", "Cup Count", "Bowl Count"])
-        
-        
-    # 検出
-    def DarknetBboxCallback(self, darknet_bboxs):
+            writer.writerow(
+                ["Image Number", "Total Objects", "Bottle Count", "Cup Count", "Bowl Count"]
+            )
+
+    def darknet_bbox_callback(self, darknet_bboxs):
+        """YOLO検出結果を更新する。"""
         self.bbox_list = darknet_bboxs.bounding_boxes
 
-    def ImageCallback(self, img_msg):
+    def image_callback(self, img_msg):
+        """画像にbboxを重畳し、CSV・画像として保存する。"""
         try:
-            cv_image = self.cv_bridge.imgmsg_to_cv2(img_msg, desired_encoding="bgr8")
+            cv_image = self.cv_bridge.imgmsg_to_cv2(img_msg, desired_encoding=IMAGE_ENCODING)
             total_objects = 0
-            object_counts = {'bottle': 0, 'cup': 0, 'bowl': 0}
+            object_counts = {name: 0 for name in TARGET_CLASSES}
 
-            with open(self.csv_file1, 'a', newline='') as file1, open(self.csv_file2, 'a', newline='') as file2:
+            with open(CSV_FILE_DETECTION, "a", newline="") as file1, open(
+                CSV_FILE_COUNT, "a", newline=""
+            ) as file2:
                 writer1 = csv.writer(file1)
                 writer2 = csv.writer(file2)
 
                 for bbox in self.bbox_list:
                     if bbox.Class in object_counts and bbox.probability >= self.m_pub_threshold:
-                        cv2.rectangle(cv_image, (bbox.xmin, bbox.ymin), (bbox.xmax, bbox.ymax), (0, 255, 0), 2)
+                        cv2.rectangle(
+                            cv_image, (bbox.xmin, bbox.ymin), (bbox.xmax, bbox.ymax), (0, 255, 0), 2
+                        )
                         label = f"{bbox.Class}: {bbox.probability:.2f}"
-                        cv2.putText(cv_image, label, (bbox.xmin, bbox.ymin - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-                        
+                        cv2.putText(
+                            cv_image,
+                            label,
+                            (bbox.xmin, bbox.ymin - 10),
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            0.5,
+                            (0, 255, 0),
+                            2,
+                        )
+
                         object_counts[bbox.Class] += 1
                         total_objects += 1
-
-                        # CSVに書き込み (cup, bowl, bottle のみ)
                         writer1.writerow([self.image_number, bbox.Class, bbox.probability])
-                
-                # 各画像のオブジェクト数をCSVに書き込み
-                writer2.writerow([self.image_number, total_objects, object_counts['bottle'], object_counts['cup'], object_counts['bowl']])
 
-            cv2.imshow("Detection Image", cv_image)
+                writer2.writerow(
+                    [
+                        self.image_number,
+                        total_objects,
+                        object_counts["bottle"],
+                        object_counts["cup"],
+                        object_counts["bowl"],
+                    ]
+                )
+
+            cv2.imshow(WINDOW_NAME, cv_image)
             cv2.waitKey(1)
-            
-            self.image_number += 1
-            
-            self.save_dir = "/home/keisoku/20241220"
-            image_filename = f"{self.save_dir}/{self.image_number}.png"
-            
-            if not os.path.exists(self.save_dir):
-                os.makedirs(self.save_dir)
-            
-            cv2.imwrite(image_filename, cv_image)
-            rospy.loginfo(f"Image saved to {image_filename}")
 
-            # 各信頼度を表示
+            self.image_number += 1
+            image_filename = os.path.join(self.save_dir, f"{self.image_number}.png")
+            cv2.imwrite(image_filename, cv_image)
+            rospy.loginfo("Image saved to %s", image_filename)
+
             for bbox in self.bbox_list:
                 if bbox.probability >= self.m_pub_threshold:
-                    rospy.loginfo(f"Detected {bbox.Class} with probability: {bbox.probability:.2f}")
+                    rospy.loginfo(
+                        "Detected %s with probability: %.2f", bbox.Class, bbox.probability
+                    )
 
-            # 画像全体のオブジェクト数を表示
-            rospy.loginfo(f"Total number of objects detected: {total_objects}")
-
-            # 物体ごとのオブジェクト数を表示
+            rospy.loginfo("Total number of objects detected: %d", total_objects)
             for obj_class, count in object_counts.items():
-                rospy.loginfo(f"Number of {obj_class}s detected: {count}")
+                rospy.loginfo("Number of %ss detected: %d", obj_class, count)
+        except CvBridgeError as error:
+            rospy.logerr("CvBridge Error: %s", error)
+        except Exception as error:
+            rospy.logerr("Unexpected error: %s", error)
 
-        except CvBridgeError as e:
-            rospy.logerr("CvBridge Error: {0}".format(e))
-        except Exception as e:
-            rospy.logerr("Unexpected error: {0}".format(e))
+
+def main():
+    rospy.loginfo("Starting Detector Node")
+    Detector()
+    rospy.spin()
+
 
 if __name__ == "__main__":
-    rospy.loginfo("Starting Detector Node")
     try:
-        Detector()
-        rospy.spin()
+        main()
     except rospy.ROSInterruptException:
         pass
     finally:

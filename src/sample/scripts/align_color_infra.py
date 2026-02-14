@@ -1,104 +1,142 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
-import rospy
-from sensor_msgs.msg import Image
-from cv_bridge import CvBridge
+"""RealSenseのトピックを受信し、infra をクロップしてパブッシュしつつ表示するノード。"""
+
 import cv2
 import threading
+import rospy
+from cv_bridge import CvBridge
+from sensor_msgs.msg import Image
+
+# ===== 設定（必要ならここを変更）=====
+NODE_NAME = "realsense_viewer"
+
+COLOR_SUB_TOPIC = "/camera/color/image_raw"  # 生カラー画像を受信する入力トピック
+INFRA_SUB_TOPIC = "/camera/infra/image_raw"  # 生赤外画像を受信する入力トピック
+DEPTH_SUB_TOPIC = "/camera/aligned_depth_to_color/image_raw"  # color基準に整列済み深度画像の入力トピック
+
+COLOR_PUB_TOPIC = "/z/color/image"  # 処理後カラー画像を再配信する出力トピック
+INFRA_PUB_TOPIC = "/z/infra/image"  # クロップ後赤外画像を再配信する出力トピック
+DEPTH_PUB_TOPIC = "/z/depth/image"  # 処理後深度画像を再配信する出力トピック
+PUBLISH_QUEUE_SIZE = 10
+
+COLOR_ENCODING = "bgr8"
+INFRA_ENCODING = "mono8"
+DEPTH_ENCODING = "passthrough"
+
+# Infra 画像の切り出し範囲
+CROP_X_START = 90
+CROP_Y_START = 50
+CROP_WIDTH = 490
+CROP_HEIGHT = 345
+
+COLOR_WINDOW_NAME = "Realsense L515 - Color"
+INFRA_WINDOW_NAME = "Realsense L515 - Infrared"
+DEPTH_WINDOW_NAME = "Realsense L515 - Depth"
+
 
 class RealsenseViewer:
+    """RealSense の 3系統画像を扱うビューア兼中継クラス。"""
+
     def __init__(self):
-        rospy.init_node('realsense_viewer', anonymous=True)
+        rospy.init_node(NODE_NAME, anonymous=True)
         self.bridge = CvBridge()
-
-        # Color 
-        self.color_subscription = rospy.Subscriber(
-            '/camera/color/image_raw',
-            Image, self.color_callback)
-        # Infrared 
-        self.infra_subscription = rospy.Subscriber(
-            '/camera/infra/image_raw',
-            Image, self.infra_callback)
-        # Depth
-        self.depth_subscription = rospy.Subscriber(
-            '/camera/aligned_depth_to_color/image_raw',
-            Image, self.depth_callback)
-
-        # Publishers
-        self.color_publisher = rospy.Publisher('/z/color/image', Image, queue_size=10)
-        self.infra_publisher = rospy.Publisher('/z/infra/image', Image, queue_size=10)
-        self.depth_publisher = rospy.Publisher('/z/depth/image', Image, queue_size=10)
-
-        # Define cropping coordinates for infrared image
-        # self.crop_x_start = 0
-        # self.crop_y_start = 0
-        # self.crop_width = 1024
-        # self.crop_height = 768
-        self.crop_x_start = 90
-        self.crop_y_start = 50
-        self.crop_width = 490
-        self.crop_height = 345
-
-        # Create thread for displaying images
-        self.display_thread = threading.Thread(target=self.display_images)
-        self.display_thread.start()
+        self.lock = threading.Lock()
 
         self.color_image = None
         self.infra_image = None
         self.depth_image = None
-        self.lock = threading.Lock()
+
+        self.color_subscription = rospy.Subscriber(
+            COLOR_SUB_TOPIC, Image, self.color_callback
+        )
+        self.infra_subscription = rospy.Subscriber(
+            INFRA_SUB_TOPIC, Image, self.infra_callback
+        )
+        self.depth_subscription = rospy.Subscriber(
+            DEPTH_SUB_TOPIC, Image, self.depth_callback
+        )
+
+        self.color_publisher = rospy.Publisher(
+            COLOR_PUB_TOPIC, Image, queue_size=PUBLISH_QUEUE_SIZE
+        )
+        self.infra_publisher = rospy.Publisher(
+            INFRA_PUB_TOPIC, Image, queue_size=PUBLISH_QUEUE_SIZE
+        )
+        self.depth_publisher = rospy.Publisher(
+            DEPTH_PUB_TOPIC, Image, queue_size=PUBLISH_QUEUE_SIZE
+        )
+
+        self.crop_x_start = CROP_X_START
+        self.crop_y_start = CROP_Y_START
+        self.crop_width = CROP_WIDTH
+        self.crop_height = CROP_HEIGHT
+
+        self.display_thread = threading.Thread(target=self.display_images)
+        self.display_thread.start()
+
+    def publish_with_header(self, publisher, cv_image, encoding, header):
+        """OpenCV 画像を ROS Image に変換して header を維持したまま publish する。"""
+        processed_msg = self.bridge.cv2_to_imgmsg(cv_image, encoding)
+        processed_msg.header = header
+        publisher.publish(processed_msg)
 
     def color_callback(self, msg):
-        rospy.loginfo('Receiving color video frame')
-        cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
+        rospy.loginfo("Receiving color video frame")
+        cv_image = self.bridge.imgmsg_to_cv2(msg, COLOR_ENCODING)
+
         with self.lock:
             self.color_image = cv_image
-            
-        processed_msg = self.bridge.cv2_to_imgmsg(cv_image, "bgr8")
-        processed_msg.header = msg.header
-        self.color_publisher.publish(processed_msg)
-    
+
+        self.publish_with_header(self.color_publisher, cv_image, COLOR_ENCODING, msg.header)
+
     def infra_callback(self, msg):
-        rospy.loginfo('Receiving infrared video frame')
-        cv_image = self.bridge.imgmsg_to_cv2(msg, "mono8")
-        
-        cropped_image = cv_image[self.crop_y_start:self.crop_y_start+self.crop_height,
-                                 self.crop_x_start:self.crop_x_start+self.crop_width]
+        rospy.loginfo("Receiving infrared video frame")
+        cv_image = self.bridge.imgmsg_to_cv2(msg, INFRA_ENCODING)
+
+        cropped_image = cv_image[
+            self.crop_y_start : self.crop_y_start + self.crop_height,
+            self.crop_x_start : self.crop_x_start + self.crop_width,
+        ]
+
         with self.lock:
             self.infra_image = cropped_image
-        processed_msg = self.bridge.cv2_to_imgmsg(cropped_image, "mono8")
-        processed_msg.header = msg.header
-        self.infra_publisher.publish(processed_msg)
-        
+
+        self.publish_with_header(
+            self.infra_publisher, cropped_image, INFRA_ENCODING, msg.header
+        )
+
     def depth_callback(self, msg):
-        rospy.loginfo('Receiving depth video frame')
-        cv_image = self.bridge.imgmsg_to_cv2(msg, "passthrough")
+        rospy.loginfo("Receiving depth video frame")
+        cv_image = self.bridge.imgmsg_to_cv2(msg, DEPTH_ENCODING)
+
         with self.lock:
             self.depth_image = cv_image
-            
-        processed_msg = self.bridge.cv2_to_imgmsg(cv_image, "passthrough")
-        processed_msg.header = msg.header
-        self.depth_publisher.publish(processed_msg)
-    
+
+        self.publish_with_header(self.depth_publisher, cv_image, DEPTH_ENCODING, msg.header)
+
     def display_images(self):
         while not rospy.is_shutdown():
             with self.lock:
                 if self.color_image is not None:
-                    cv2.imshow("Realsense L515 - Color", self.color_image)
+                    cv2.imshow(COLOR_WINDOW_NAME, self.color_image)
                 if self.infra_image is not None:
-                    cv2.imshow("Realsense L515 - Infrared", self.infra_image)
+                    cv2.imshow(INFRA_WINDOW_NAME, self.infra_image)
                 if self.depth_image is not None:
-                    cv2.imshow("Realsense L515 - Depth", self.depth_image)
+                    cv2.imshow(DEPTH_WINDOW_NAME, self.depth_image)
             cv2.waitKey(1)
 
+
 def main():
-    viewer = RealsenseViewer()
+    _viewer = RealsenseViewer()
     try:
         rospy.spin()
     except KeyboardInterrupt:
         rospy.loginfo("Shutting down")
     finally:
-        cv2.destroyAllWindows()  # Ensure that all OpenCV windows are closed
+        cv2.destroyAllWindows()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

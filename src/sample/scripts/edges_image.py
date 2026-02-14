@@ -1,122 +1,60 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""ディレクトリ内の画像に Canny エッジを重ねて保存する。"""
+
+import glob
+import os
 
 import cv2
-import os
-import glob
+import numpy as np
+from tqdm import tqdm
 
-# 画像ファイルのパスのリストを取得
-image_paths = sorted(glob.glob("/home/keisoku/pytorch-CycleGAN-and-pix2pix/datasets/Data7/edge/Test_image/infra/*"))
-
-# 保存先ディレクトリ
-output_dir = "/home/keisoku/pytorch-CycleGAN-and-pix2pix/datasets/Data7/edge/Test_image/origin_edge"
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
-
-padding_width = 3
-
-try:
-    for i, image_path in enumerate(image_paths):
-        image = cv2.imread(image_path)
-        if image is None:
-            print(f"Error: Could not load image {image_path}")
-            continue
-
-        frame = image.copy()
-        print(f"{image_path}")
-        
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-        # Cannyエッジ検出
-        edges = cv2.Canny(gray, 30, 50)
-
-        # エッジ線を膨張させて太くする
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 1))  # カーネルサイズを変更するとエッジ線の太さが調整できる
-        edges_dilated = cv2.dilate(edges, kernel, iterations=1)
-
-        # 色付きのエッジ画像
-        edges_color = cv2.cvtColor(edges_dilated, cv2.COLOR_GRAY2BGR)
-
-        # 元の画像とエッジ画像を合成
-        comb_images = cv2.addWeighted(frame, 0.8, edges_color, 0.2, 0)
-
-        # 結果の保存
-        comb_output_path = os.path.join(output_dir, f"{str(i + 1).zfill(padding_width)}.png")
-        
-        cv2.imwrite(comb_output_path, comb_images)
-        cv2.imshow("frame_comb", comb_images)
-
-        # 'q' キーが押されたらループを抜ける
-        if cv2.waitKey(10) & 0xFF == ord('q'):
-            break
-
-except Exception as e:
-    print(f"An error occurred: {e}")
-finally:
-    cv2.destroyAllWindows()
+# ===== 設定（最初に編集する場所）=====
+INPUT_GLOB_PATTERN = "/home/keisoku/sam2/6_Sam2/ir_filtering_homo_masked/*"
+OUTPUT_DIR = "/home/keisoku/sam2/6_Sam2/ir_filtering_homo_masked_edge"
+PADDING_WIDTH = 3
+CANNY_THRESHOLD_1 = 200
+CANNY_THRESHOLD_2 = 200
+WINDOW_NAME = "frame_comb"
+QUIT_KEY = "q"
 
 
-# #depth_anythingを使った時エッジの合成
-# import cv2
-# import os
-# import glob
+def draw_white_edges(image: np.ndarray) -> np.ndarray:
+    """画像に Canny エッジを白で上書きした結果を返す。"""
+    frame = image.copy()
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    edges = cv2.Canny(gray, CANNY_THRESHOLD_1, CANNY_THRESHOLD_2)
+    y_coords, x_coords = np.where(edges > 0)
+    frame[y_coords, x_coords] = [255, 255, 255]
+    return frame
 
-# # 入力画像のパスリストを取得
-# input_dir = "/home/keisoku/20241203_gomi/depth_any/*"
-# corresponding_infra_dir = "/home/keisoku/20241203_gomi/"
-# image_paths = sorted(glob.glob(input_dir))
 
-# # 画像ファイルが格納されているディレクトリのパス
-# conb_dir = "/home/keisoku/20241203_gomi/a/*"  # ここがディレクトリであることに注意
-# conb_paths = sorted(glob.glob(conb_dir))
+def main() -> None:
+    image_paths = sorted(glob.glob(INPUT_GLOB_PATTERN))
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# print(f"Number of images in 'depth_any': {len(image_paths)}")
-# print(f"Number of images in 'a': {len(conb_paths)}")
+    try:
+        for index, image_path in enumerate(tqdm(image_paths, desc="Now Edgesing"), start=1):
+            image = cv2.imread(image_path)
+            if image is None:
+                print(f"Error: Could not load image {image_path}")
+                continue
 
-# # 画像ファイルの数が一致していることを確認
-# if len(image_paths) != len(conb_paths):
-#     print("Error: The number of images in 'depth_any' and 'a' directories do not match.")
-# else:
-#     # 複数の画像に対して処理
-#     for img_path, conb_path in zip(image_paths, conb_paths):
-#         # 画像を読み込む
-#         image = cv2.imread(img_path)
-#         if image is None:
-#             print(f"Error: Could not load image {img_path}")
-#             continue
-        
-#         # conb画像を読み込む
-#         conb_image = cv2.imread(conb_path)
-#         if conb_image is None:
-#             print(f"Error: Could not load image {conb_path}")
-#             continue
-        
-#         # 対応する infra ファイルのパスを計算
-#         file_name = os.path.basename(img_path)
-#         infra_output_path = os.path.join(corresponding_infra_dir, file_name)
-        
-#         # 元画像処理
-#         frame = image.copy()
-#         print(f"Processing: {img_path} -> {infra_output_path}")
+            frame = draw_white_edges(image)
+            output_path = os.path.join(OUTPUT_DIR, f"{str(index).zfill(PADDING_WIDTH)}.png")
+            cv2.imwrite(output_path, frame)
+            cv2.imshow(WINDOW_NAME, frame)
 
-#         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-#         edges = cv2.Canny(gray, 50, 50)
-#         edges_color = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
+            if cv2.waitKey(10) & 0xFF == ord(QUIT_KEY):
+                break
 
-#         # 合成のため、conb_image をグレースケールに変換
-#         conbi = cv2.cvtColor(conb_image, cv2.COLOR_BGR2GRAY)
+        print("全ての画像にエッジ検出・上書きしました！")
+    except Exception as error:
+        print(f"An error occurred: {error}")
+    finally:
+        cv2.destroyAllWindows()
 
-#         # サイズを揃える
-#         conbi_resized = cv2.resize(conbi, (edges_color.shape[1], edges_color.shape[0]))
 
-#         # グレースケール画像をカラーに変換
-#         conbi_resized_color = cv2.cvtColor(conbi_resized, cv2.COLOR_GRAY2BGR)
-
-#         # 画像を合成
-#         comb_images = cv2.addWeighted(conbi_resized_color, 0.8, edges_color, 0.2, 0)
-
-#         # 対応する infra ファイルに上書き保存
-#         cv2.imwrite(infra_output_path, comb_images)
-#         # cv2.imshow("frame_comb", comb_images)
-
-#         cv2.waitKey(0)
-#         cv2.destroyAllWindows()
+if __name__ == "__main__":
+    main()

@@ -2,84 +2,120 @@
 # -*- coding: utf-8 -*-
 
 import rospy
-from geometry_msgs.msg import Point
-from sensor_msgs.msg import Image, CameraInfo
-from darknet_ros_msgs.msg import BoundingBoxes, BoundingBox
 from cv_bridge import CvBridge, CvBridgeError
+from darknet_ros_msgs.msg import BoundingBoxes, BoundingBox
+from geometry_msgs.msg import Point, TransformStamped
+from sensor_msgs.msg import Image
 import tf2_ros
-import tf2_geometry_msgs
-from geometry_msgs.msg import TransformStamped
+
+# ===== 設定（最初に編集する場所）=====
+NODE_NAME = "Tfpoint_detector_node"
+PUB_THRESHOLD_PARAM = "~pub_threshold"
+DEFAULT_PUB_THRESHOLD = 0.20
+TARGET_CLASS = "cup"
+
+# 入力トピック
+BBOX_TOPIC = "/darknet_ros/bounding_boxes"  # YOLO検出結果（bbox）を受信する入力トピック
+DEPTH_TOPIC = "/camera/aligned_depth_to_color/image_raw"  # color座標系に整列済みdepth入力トピック
+
+# 出力トピック
+POINT_TOPIC = "Topic_tf_point"  # 推定3D座標(Point)を配信する出力トピック
+PUBLISH_QUEUE_SIZE = 1
+
+# 投影計算パラメータ（depth camera info固定値）
+CX = 320.6761474609375
+CY = 250.00796508789062
+FX = 603.1981201171875
+FY = 603.3027954101562
+Y_CORRECTION_RATIO = 0.2
+
+# 検出有効範囲
+MIN_Z_M = 0.40
+MAX_Z_M = 2.0
+MIN_X_M = -0.4
+MAX_X_M = 0.4
+
+# TF設定
+PARENT_FRAME_ID = "camera_color_optical_frame"
+CHILD_FRAME_ID = "target_frame"
 
 class Tfpoint_Detector:
+    """bbox中心から3D座標を計算し、PointとTFを配信する。"""
+
     def __init__(self):
-        rospy.init_node("Tfpoint_detector_node")
+        rospy.init_node(NODE_NAME)
         self.bbox = BoundingBox()
         self.cv_bridge = CvBridge()
-        self.pub_threshold = rospy.get_param("~pub_threshold", 0.20)
-        self.pub = rospy.Publisher("Topic_tf_point", Point, queue_size=10)
+        self.pub_threshold = rospy.get_param(PUB_THRESHOLD_PARAM, DEFAULT_PUB_THRESHOLD)
+        self.pub = rospy.Publisher(POINT_TOPIC, Point, queue_size=PUBLISH_QUEUE_SIZE)
+        self.tf_broadcaster = tf2_ros.TransformBroadcaster()
+        self.class_name = ""
 
-        # average variables
-        self.sum_x = 0
-        self.sum_y = 0
-        self.sum_z = 0
         self.cam_x = 0.0
         self.cam_y = 0.0
+        self.bbox_depth = 0.0
+        self.x1 = 0.0
+        self.y1 = 0.0
+        self.z = 0.0
 
-        # detection subscription
-        self.sub_head_bbox = rospy.Subscriber("/darknet_ros/bounding_boxes", BoundingBoxes, self.HeadBboxCallback)
-        self.sub_cam_depth     = rospy.Subscriber("/camera/aligned_depth_to_color/image_raw", Image, self.DepthCallback)
-        # self.sub_cam_depth = rospy.Subscriber("/hsrb/head_rgbd_sensor/depth_registered/image_raw", Image, self.DepthCallback)
-        # self.sub_camera_info = rospy.Subscriber("/hsrb/head_rgbd_sensor/depth_registered/camera_info", CameraInfo, self.CameraInfoCallback)
+        self.sub_head_bbox = rospy.Subscriber(
+            BBOX_TOPIC, BoundingBoxes, self.head_bbox_callback
+        )
+        self.sub_cam_depth = rospy.Subscriber(DEPTH_TOPIC, Image, self.depth_callback)
 
-    def HeadBboxCallback(self, darknet_bboxs):
+    def head_bbox_callback(self, darknet_bboxs):
+        """対象クラスbboxの中心画素座標を更新する。"""
         bbox = BoundingBox()
         head_bboxs = darknet_bboxs.bounding_boxes
         if head_bboxs:
-            for i in range(len(head_bboxs)):
-                if head_bboxs[i].Class == "bottle" and head_bboxs[i].probability >= self.pub_threshold:
-                    bbox = head_bboxs[i]
+            for det_bbox in head_bboxs:
+                if (
+                    det_bbox.Class == TARGET_CLASS
+                    and det_bbox.probability >= self.pub_threshold
+                ):
+                    bbox = det_bbox
                     self.class_name = bbox.Class
 
-                    #中心座標
                     self.cam_x = bbox.xmin + (bbox.xmax - bbox.xmin) / 2
                     self.cam_y = bbox.ymin + (bbox.ymax - bbox.ymin) / 2
-                else:
-                    pass
-        else:
-            pass        
 
-    def DepthCallback(self, depth_image_data):
+    def depth_callback(self, depth_image_data):
+        """depth画像からbbox中心の距離を取得し、座標変換を実行する。"""
         try:
             self.depth_image = self.cv_bridge.imgmsg_to_cv2(depth_image_data, "passthrough")
             depth_x = int(self.cam_x)
             depth_y = int(self.cam_y)
+            h, w = self.depth_image.shape[:2]
+            if not (0 <= depth_x < w and 0 <= depth_y < h):
+                return
+
             self.bbox_depth = self.depth_image[depth_y, depth_x]
-            
-            self.CameraInfoCallback()
+            self.camera_info_callback()
 
-        except CvBridgeError as e:
-            rospy.logerr("CvBridge Error: %s", e)
+        except CvBridgeError as error:
+            rospy.logerr("CvBridge Error: %s", error)
 
-    #座標変換
-    def CameraInfoCallback(self):
+    def camera_info_callback(self):
+        """固定内部パラメータで3D座標へ変換し、範囲内なら配信する。"""
         if self.cam_x != 0.0 and self.cam_y != 0.0 or self.cam_x > self.cam_y:
             try:
-                self.x = self.cam_x - 320.7234912485017  #depth_infoの値を入力
-                self.y = self.cam_y - 242.2827148742709
+                x = self.cam_x - CX
+                y = self.cam_y - CY
                 self.z = self.bbox_depth
 
-                self.x1 = self.z * self.x / 533.8084805746594
-                self.y1 = self.z * self.y / 534.057713759154
+                self.x1 = self.z * x / FX
+                self.y1 = self.z * y / FY
 
                 self.x1 = self.x1 * 0.001
-                self.y1 = self.y1 * 0.001 + 0.2 * self.y1 *0.001
+                self.y1 = self.y1 * 0.001 + Y_CORRECTION_RATIO * self.y1 * 0.001
                 self.z = self.z * 0.001
-            except Exception as e:
-                rospy.logwarn("Transform Error: %s", str(e))
+            except Exception as error:
+                rospy.logwarn("Transform Error: %s", str(error))
+                return
 
-            if 0.40 < self.z <= 2 :
-                if -0.4 < self.x1 < 0.4:
-                    self.CoordinatePointCallback()
+            if MIN_Z_M < self.z <= MAX_Z_M:
+                if MIN_X_M < self.x1 < MAX_X_M:
+                    self.coordinate_point_callback()
                     point_msg = Point()
                     point_msg.x = self.x1
                     point_msg.y = self.y1
@@ -96,16 +132,14 @@ class Tfpoint_Detector:
                 self.y1 = 0.0
         else:
             rospy.logwarn("Not Detection")
-            # rospy.loginfo("x =%.2f y=%.2f z=%.2f ", self.cam_x, self.cam_y, self.z)
 
-    def CoordinatePointCallback(self):
+    def coordinate_point_callback(self):
+        """現在の推定座標をTFとして配信する。"""
         try:
-            static_tf_broadcaster = tf2_ros.TransformBroadcaster()
-
             gt = TransformStamped()
             gt.header.stamp = rospy.Time.now()
-            gt.header.frame_id = "camera_color_optical_frame"
-            gt.child_frame_id = "target_frame"
+            gt.header.frame_id = PARENT_FRAME_ID
+            gt.child_frame_id = CHILD_FRAME_ID
             gt.transform.translation.x = self.x1
             gt.transform.translation.y = self.y1
             gt.transform.translation.z = self.z
@@ -115,16 +149,25 @@ class Tfpoint_Detector:
             gt.transform.rotation.z = 0.0
             gt.transform.rotation.w = 1.0
 
-            static_tf_broadcaster.sendTransform(gt)
-            rospy.loginfo("class:%s x = %.2f y = %.2f z = %.2f --> tf_publish", self.class_name, self.x1, self.y1, self.z)
-        except Exception as e:
-            rospy.logerr("Unable to create tf: %s", str(e))
+            self.tf_broadcaster.sendTransform(gt)
+            rospy.loginfo(
+                "class:%s x = %.2f y = %.2f z = %.2f --> tf_publish",
+                self.class_name,
+                self.x1,
+                self.y1,
+                self.z,
+            )
+        except Exception as error:
+            rospy.logerr("Unable to create tf: %s", str(error))
 
-if __name__ == '__main__':
+
+def main():
+    Tfpoint_Detector()
+    rospy.spin()
+
+
+if __name__ == "__main__":
     try:
-        
-        Tfpoint_Detector()
-        rospy.spin()
-
+        main()
     except rospy.ROSInterruptException:
         pass

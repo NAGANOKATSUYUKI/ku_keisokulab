@@ -1,29 +1,53 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""ディレクトリ内の画像に CLAHE を適用して保存し、結果を表示する。"""
+
 import cv2
 import os
 
+# ===== 設定（最初に編集する場所）=====
+INPUT_FOLDER = "/home/keisoku/pytorch-CycleGAN-and-pix2pix/datasets/Data5/Data/infra"
+OUTPUT_FOLDER = "/home/keisoku/pytorch-CycleGAN-and-pix2pix/datasets/Data5/clahe/1"
+SUPPORTED_EXTENSIONS = (".png", ".jpg")
+CLIP_LIMIT = 2
+TILE_GRID_SIZE = 4
+WINDOW_NAME = "Image"
 
-input_folder = '/home/keisoku/pytorch-CycleGAN-and-pix2pix/datasets/Data5/Data/infra'
-output_folder = '/home/keisoku/pytorch-CycleGAN-and-pix2pix/datasets/Data5/clahe/1'
+def apply_clahe_to_directory(input_folder: str, output_folder: str) -> None:
+    """入力ディレクトリの画像に CLAHE を適用し、出力ディレクトリへ保存する。"""
+    if not os.path.isdir(input_folder):
+        raise NotADirectoryError(f"Input folder not found: {input_folder}")
 
-# 適用的ヒストグラム平坦化
-clipLimit = 2
-size = 4
-clahe = cv2.createCLAHE(clipLimit= clipLimit, tileGridSize=(size, size))
+    os.makedirs(output_folder, exist_ok=True)
+    clahe = cv2.createCLAHE(
+        clipLimit=CLIP_LIMIT, tileGridSize=(TILE_GRID_SIZE, TILE_GRID_SIZE)
+    )
 
-for filename in os.listdir(input_folder):
-    if filename.endswith('.png') or filename.endswith('.jpg'):
-        img_path = os.path.join(input_folder, filename)
-        img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
-        cl1 = clahe.apply(img)  
+    processed_count = 0
+    for filename in os.listdir(input_folder):
+        if not filename.lower().endswith(SUPPORTED_EXTENSIONS):
+            continue
 
+        input_path = os.path.join(input_folder, filename)
         output_path = os.path.join(output_folder, filename)
-        cv2.imwrite(output_path, cl1)
 
-        cl1 = cv2.cvtColor(cl1, cv2.COLOR_GRAY2BGR)
-        cv2.imshow('Image', cl1)
+        image = cv2.imread(input_path, cv2.IMREAD_GRAYSCALE)
+        if image is None:
+            print(f"スキップ: 読み込み失敗 '{input_path}'")
+            continue
+
+        enhanced = clahe.apply(image)
+        cv2.imwrite(output_path, enhanced)
+
+        preview = cv2.cvtColor(enhanced, cv2.COLOR_GRAY2BGR)
+        cv2.imshow(WINDOW_NAME, preview)
         cv2.waitKey(1)
+        processed_count += 1
 
-cv2.destroyAllWindows()
+    cv2.destroyAllWindows()
+    print(f"全画像のコントラストと明度を統一: {processed_count} files")
 
-print("全画像のコントラストと明度を統一")
+
+if __name__ == "__main__":
+    apply_clahe_to_directory(INPUT_FOLDER, OUTPUT_FOLDER)

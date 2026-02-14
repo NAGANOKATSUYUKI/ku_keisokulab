@@ -248,10 +248,8 @@ def Tf_grasp():
         whole_body.move_end_effector_pose(geometry.pose(x= -0.03, z = 0.10), _HAND_TF)
 
 if __name__=='__main__':
-
         while True:
-                user_input = input("プログラムを終了するにはキーを入力してください: ")
-
+                user_input = input("キーを入力 e OR c :")
                 if user_input == "e":
                         try:
                                 Hand_controller(positions=[-0.4])
@@ -264,21 +262,21 @@ if __name__=='__main__':
                                 Tf_grasp()
 
                                 rospy.sleep(5.0)
-                                Hand_controller(positions=[-0.5])
+                                Hand_controller(positions=[-0.2]) # ここのハンド距離が機能していないため、エラーが起きる
                                 rospy.loginfo("Bottle --> Grasp")
 
-                                rospy.sleep(5.0)
+                                # rospy.sleep(5.0)
                                 # 手先相対で上にハンドを移動
                                 whole_body.move_end_effector_pose(hand_up, _HAND_TF)
-                                # 手先相対で後ろにハンドを移動
+                                # # 手先相対で後ろにハンドを移動
                                 whole_body.move_end_effector_pose(hand_back, _HAND_TF)
                                 
                                 rospy.sleep(2.0)
                                 Arm_controller(positions=[0,0,0, -1.57,0])                              #  --> neutral
 
                                 rospy.sleep(5.0)
-                                omni_base.go_abs(0.0, 0.0, 0.0, 20.0)
-                                # Omni_base_controller(positions=[0,0,0])
+                                # omni_base.go_abs(0.0, 0.0, 0.0, 20.0)
+                                Omni_base_controller(positions=[0,0,0])
                                 rospy.loginfo("初期位置 --> OK")
 
                                 rospy.sleep(5.0)

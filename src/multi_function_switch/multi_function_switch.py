@@ -6,7 +6,6 @@ import time
 from sound_play.libsoundplay import SoundClient
 from std_msgs.msg import Bool
 
-
 class MultiFunctionSwitch(object):
     def __init__(self):
         self.status = False

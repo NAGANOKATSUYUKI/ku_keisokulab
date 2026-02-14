@@ -1,60 +1,62 @@
 #!/usr/bin/env python3
-# license removed for brevity
+# -*- coding: utf-8 -*-
+
+"""custom メッセージと Bool メッセージを publish する。"""
 
 import rospy
-# 生成したメッセージのヘッダファイル
 from sample.msg import sample_message
 from std_msgs.msg import Bool
 
+# ===== 設定（最初に編集する場所）=====
+CUSTOM_NODE_NAME = "sample_py_publisher"
+CUSTOM_TOPIC = "sample_topic"
+CUSTOM_RATE_HZ = 2
+CUSTOM_TEXT = "hello world"
 
-def publisher():
-    # 初期化し、ノードの名前を"sample_c_publisher"とする
-    rospy.init_node('sample_py_publisher', anonymous=True)
-    # sample_messageというメッセージを"sample_topic"というトピックに送信する
-    pub = rospy.Publisher('sample_topic', sample_message, queue_size=10)
-    # 1秒間に2回データを送信する
-    rate = rospy.Rate(2)
+BOOL_NODE_NAME = "sample_Bool_pub"
+BOOL_TOPIC = "sample_Bool"
+BOOL_RATE_HZ = 1
+BOOL_DEFAULT_DATA = True
+
+def publish_custom_message():
+    """`sample_message` を定期 publish する。"""
+    rospy.init_node(CUSTOM_NODE_NAME, anonymous=True)
+    pub = rospy.Publisher(CUSTOM_TOPIC, sample_message, queue_size=10)
+    rate = rospy.Rate(CUSTOM_RATE_HZ)
 
     count = 0
     while not rospy.is_shutdown():
-        str = "hello world"
-        rospy.loginfo("message = %s, count = %d" %(str, count))
+        rospy.loginfo("message = %s, count = %d", CUSTOM_TEXT, count)
 
-        # 送信するメッセージの作成
         msg = sample_message()
-        msg.message = str
+        msg.message = CUSTOM_TEXT
         msg.count = count
 
-        # 送信
         pub.publish(msg)
         rate.sleep()
         count += 1
 
-def publisher_Bool():
-    rospy.init_node('sample_Bool_pub', anonymous=True)
+def publish_bool_message():
+    """`Bool` を定期 publish する。"""
+    rospy.init_node(BOOL_NODE_NAME, anonymous=True)
+    pub = rospy.Publisher(BOOL_TOPIC, Bool, queue_size=10)
+    rate = rospy.Rate(BOOL_RATE_HZ)
 
-    pub = rospy.Publisher('sample_Bool', Bool, queue_size=10)
-
-    rate = rospy.Rate(1)
-
-    def_data = None
     count = 0
     while not rospy.is_shutdown():
-        rospy.loginfo("Publishing  %s, count = %d" %(str(def_data), count))
-
-        # 送信するメッセージの作成
+        rospy.loginfo("Publishing %s, count = %d", str(BOOL_DEFAULT_DATA), count)
         msg = Bool()
-
-        def_data = True
-        msg.data = def_data
-
-        # 送信
+        msg.data = BOOL_DEFAULT_DATA
         pub.publish(msg)
         rate.sleep()
         count += 1
 
-if __name__ == '__main__':
+def main():
     try:
-        # publisher()
-        publisher_Bool()
-    except rospy.ROSInterruptException: pass
+        # publish_custom_message()
+        publish_bool_message()
+    except rospy.ROSInterruptException:
+        pass
+
+if __name__ == "__main__":
+    main()
