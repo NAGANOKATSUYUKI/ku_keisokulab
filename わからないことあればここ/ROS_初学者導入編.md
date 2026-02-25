@@ -117,6 +117,8 @@ mkdir -p ~/catkin_ws/src
 cd ~/catkin_ws
 catkin_make
 ```
+※自作以外のパッケージ(darknet_ros,realsense-rosなど)も同時にビルドすると失敗する場合あり
+　この場合,パッケージを指定して一つずつビルドすると解決しやすい．
 
 環境読み込み：
 ```bash
