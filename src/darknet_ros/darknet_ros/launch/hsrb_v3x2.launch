@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<launch>
+ 
+  <arg name="camera_num_0" default="0" />
+
+  <include file="$(find darknet_ros)/launch/darknet_ros_rename.launch">
+    <arg name="network_param_file"    value="$(find darknet_ros)/config/yolov3.yaml"/>
+    <arg name="num" value="$(arg camera_num_0)" />
+    <arg name="image"         value="/hsrb/head_rgbd_sensor/rgb/image_raw" />
+    <arg name="bbox"          value="darknet_ros$(arg camera_num_0)/bounding_boxes" />
+    <arg name="obj"           value="darknet_ros$(arg camera_num_0)/found_object" />
+    <arg name="detection_img" value="darknet_ros$(arg camera_num_0)/detection_image" />
+  </include>
+
+  <arg name="camera_num_1" default="1" />
+
+  <include file="$(find darknet_ros)/launch/darknet_ros_rename.launch">
+    <arg name="network_param_file"    value="$(find darknet_ros)/config/yolov3.yaml"/>
+    <arg name="num" value="$(arg camera_num_1)" />
+    <arg name="image"         value="/hsrb/hand_rotation/image_raw" />
+    <arg name="bbox"          value="darknet_ros$(arg camera_num_1)/bounding_boxes" />
+    <arg name="obj"           value="darknet_ros$(arg camera_num_1)/found_object" />
+    <arg name="detection_img" value="darknet_ros$(arg camera_num_1)/detection_image" />
+  </include>
+
+</launch>
