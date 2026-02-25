@@ -31,16 +31,6 @@
 ## その他
 
 - 基本的に ROS1 用で Python/C++ ノードを作成しています。ROS2 で使う場合は、ROS1依存ライブラリ部分の修正が必要です。
-- 補足README（パッケージ別）
-
-| ドキュメント | 概要 | リンク |
-|---|---|---|
-| sample README | `sample` の構成とスクリプト概要 | [src/sample/README.md](src/sample/README.md) |
-| pix2pix README | `pix2pix` の処理パイプラインと利用方法 | [src/pix2pix/README.md](src/pix2pix/README.md) |
-| multi_function_switch README | スイッチ連動と音再生スクリプトの説明 | [src/multi_function_switch/README.md](src/multi_function_switch/README.md) |
-| darknet_ros 説明README | YOLO連携パッケージの設定と起動方法 | [src/darknet_ros/README_WORKSPACE_JA.md](src/darknet_ros/README_WORKSPACE_JA.md) |
-| realsense-ros 説明README | RealSenseパッケージの起動と主要パラメータ | [src/realsense-ros/README_WORKSPACE_JA.md](src/realsense-ros/README_WORKSPACE_JA.md) |
-
 - 補足README（`わからないことあればここ`）
 
 | ドキュメント | 概要 | リンク |
