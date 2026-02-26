@@ -1,8 +1,0 @@
-prefix=/home/keisoku/catkin_ws/install
-
-Name: hsrc
-Description: Description of hsrc
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 

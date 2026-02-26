@@ -13,7 +13,7 @@
 - ファイル操作: `rename.py`, `resize_image.py`, `image_crop.py`, `image_crop2.py`, `image_combi.py`
 - 融合/比較: `image2fusion.py`, `click_CheckPixel_image.py`, `csvfile_sort.py`
 - 画像配信/保存: `image2movie.py`, `save_image.py`, `save_click_image.py`, `save_color_infra.py`, `save_infra.py`
-- 検出関連: `image2yolo.py`, `yolo_image.py`, `sample.py`
+- 検出関連: `image2yolo.py`, `yolo_image.py`
 - ROS通信学習用: `sample_publisher.py`, `sample_subscriber.py`
 - 幾何変換: `HomographyProjecterTf.py`
 

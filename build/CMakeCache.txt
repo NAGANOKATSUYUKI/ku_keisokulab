@@ -902,17 +902,11 @@ gtest_hide_internal_symbols:BOOL=OFF
 //Dependencies for the target
 gtest_main_LIB_DEPENDS:STATIC=general;gtest;
 
-//Value Computed by CMake
-hsrc_BINARY_DIR:STATIC=/home/keisoku/catkin_ws/build/hsrc
-
-//Value Computed by CMake
-hsrc_SOURCE_DIR:STATIC=/home/keisoku/catkin_ws/src/hsrc
-
 //The directory containing a CMake configuration file for image_transport.
 image_transport_DIR:PATH=/opt/ros/noetic/share/image_transport/cmake
 
 //Path to a library.
-lib:FILEPATH=/opt/ros/noetic/lib/libcv_bridge.so
+lib:FILEPATH=/opt/ros/noetic/lib/libdiagnostic_updater.so
 
 //The directory containing a CMake configuration file for message_filters.
 message_filters_DIR:PATH=/opt/ros/noetic/share/message_filters/cmake
@@ -996,12 +990,6 @@ rostest_DIR:PATH=/opt/ros/noetic/share/rostest/cmake
 rostime_DIR:PATH=/opt/ros/noetic/share/rostime/cmake
 
 //Value Computed by CMake
-rs_cam_BINARY_DIR:STATIC=/home/keisoku/catkin_ws/build/rs_cam
-
-//Value Computed by CMake
-rs_cam_SOURCE_DIR:STATIC=/home/keisoku/catkin_ws/src/rs_cam
-
-//Value Computed by CMake
 sample_BINARY_DIR:STATIC=/home/keisoku/catkin_ws/build/sample
 
 //Value Computed by CMake
@@ -1033,12 +1021,6 @@ tf2_ros_DIR:PATH=/opt/ros/noetic/share/tf2_ros/cmake
 
 //The directory containing a CMake configuration file for tf.
 tf_DIR:PATH=/opt/ros/noetic/share/tf/cmake
-
-//Value Computed by CMake
-usb-camera_BINARY_DIR:STATIC=/home/keisoku/catkin_ws/build/usb-camera
-
-//Value Computed by CMake
-usb-camera_SOURCE_DIR:STATIC=/home/keisoku/catkin_ws/src/usb-camera
 
 //The directory containing a CMake configuration file for xmlrpcpp.
 xmlrpcpp_DIR:PATH=/opt/ros/noetic/share/xmlrpcpp/cmake
@@ -1203,7 +1185,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=13
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=10
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP

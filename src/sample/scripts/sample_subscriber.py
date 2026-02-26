@@ -14,9 +14,17 @@ CUSTOM_TOPIC = "sample_topic"
 BOOL_NODE_NAME = "sample_Bool_sub"
 BOOL_TOPIC = "sample_Bool"
 
+# ★ 受信回数カウンタ
+bool_count = 0
+custom_count = 0
+
 def callback_custom(msg):
+    global custom_count
     """sample_message 受信時のコールバック。"""
-    rospy.loginfo("I heard: message = [%s], count = [%d]", msg.message, msg.count)
+    rospy.loginfo(
+        "I heard: message=[%s], count=[%d], receive_count=[%d]",
+        msg.message, msg.count, custom_count
+    )
 
 def subscribe_custom_message():
     """sample_message を subscribe し続ける。"""
@@ -25,8 +33,12 @@ def subscribe_custom_message():
     rospy.spin()
 
 def callback_bool(msg):
+    global bool_count
+    bool_count += 1
     """Bool 受信時のコールバック。"""
-    rospy.loginfo("Received: %s", msg.data)
+    rospy.loginfo(
+        "Received Bool=[%s], receive_count=[%d]",
+        msg.data, bool_count)
 
 def subscribe_bool_message():
     """Bool を subscribe し続ける。"""

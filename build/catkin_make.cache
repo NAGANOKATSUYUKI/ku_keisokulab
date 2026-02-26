@@ -1,2 +1,2 @@
-darknet_ros/darknet_ros:darknet_ros/darknet_ros_msgs:hsrc:pix2pix:realsense-ros/realsense2_camera:realsense-ros/realsense2_description:rs_cam:sample:usb-camera
+darknet_ros/darknet_ros:darknet_ros/darknet_ros_msgs:pix2pix:realsense-ros/realsense2_camera:realsense-ros/realsense2_description:sample
 -DCATKIN_DEVEL_PREFIX=/home/keisoku/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/keisoku/catkin_ws/install -G Unix Makefiles

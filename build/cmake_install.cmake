@@ -136,10 +136,7 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("/home/keisoku/catkin_ws/build/sample/cmake_install.cmake")
   include("/home/keisoku/catkin_ws/build/darknet_ros/darknet_ros_msgs/cmake_install.cmake")
   include("/home/keisoku/catkin_ws/build/darknet_ros/darknet_ros/cmake_install.cmake")
-  include("/home/keisoku/catkin_ws/build/hsrc/cmake_install.cmake")
-  include("/home/keisoku/catkin_ws/build/rs_cam/cmake_install.cmake")
   include("/home/keisoku/catkin_ws/build/realsense-ros/realsense2_camera/cmake_install.cmake")
-  include("/home/keisoku/catkin_ws/build/usb-camera/cmake_install.cmake")
 
 endif()
 
