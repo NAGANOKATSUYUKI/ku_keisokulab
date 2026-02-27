@@ -1,6 +1,6 @@
 # 赤外線画像の疑似カラー化方法
 
-## 1画像の収集・カラー化データセット作成
+## 1. 画像の収集・カラー化データセット作成
 
 1. リアルセンスカメラ起動  
 カメラによってファイルを指定する。`~/realsense-ros/realsense2_camera/launch/` 以下に様々なファイルがある。  
@@ -37,7 +37,7 @@ rosrun pix2pix save_color_infra.py
 
 ・保存したい画像がある場合は適時ファイル内のトピック名を編集する
 
-## 2pix2pixで画像生成モデルの作成
+## 2. pix2pixで画像生成モデルの作成
 ### 画像の前処理
 1. 画像を連番でrenameする
 
@@ -93,7 +93,7 @@ python3 test_dir.py --dataroot None --name Data_edges --model pix2pix --directio
 ※注意!!!  
 `test_image.py-test_dir.py` と `test_realtime.py` でモデルが同じでも生成される画像が違うので注意（原因不明）
 
-## 4HSRを使った暗闇の中での物体把持
+## 3. HSRを使った暗闇の中での物体把持
 
 ・リアルセンスカメラ起動とrqtで動いているか確認
 
