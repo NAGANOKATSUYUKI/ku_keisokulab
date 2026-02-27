@@ -1,6 +1,6 @@
 # 赤外線画像の疑似カラー化方法
 
-## 画像の収集・カラー化データセット作成
+## 1画像の収集・カラー化データセット作成
 
 1. リアルセンスカメラ起動  
 カメラによってファイルを指定する。`~/realsense-ros/realsense2_camera/launch/` 以下に様々なファイルがある。  
@@ -37,8 +37,8 @@ rosrun pix2pix save_color_infra.py
 
 ・保存したい画像がある場合は適時ファイル内のトピック名を編集する
 
-## pix2pixで画像生成モデルの作成
-
+## 2pix2pixで画像生成モデルの作成
+### 画像の前処理
 1. 画像を連番でrenameする
 
 ```bash
@@ -51,7 +51,7 @@ rosrun pix2pix rename.py
 ```bash
 rosrun pix2pix resize_image.py 
 ```
-
+### データセットの作成
 3. 画像をtest,train,valに仕分ける
 
 ```bash
@@ -67,20 +67,21 @@ Aがカラー画像用、Bが赤外線画像用として使う
 python3 combine_A_and_B.py --fold_A /home/~ --fold_B /home/~ --fold_AB /home/~
 ```
 
-6. 学習コマンド  
+6. 機械学習コマンド  
 `$ python3 train.py --dataroot /学習させたい画像までのフォルダ指定 --name 作成モデル名 --model モデル形式 --direction BtoA --crop_size 512or256 --load_size 512or256`  
 ・画像サイズを512で学習、画像生成したい場合
 
 ```bash
 python3 train.py --dataroot /home/~ --name ~ --model pix2pix --direction BtoA --display_id 0 --crop_size 512 --load_size 512
 ```
+- 作成されたモデルは，checkpoints/に保存される．
 
 ### 疑似カラー化テスト
 
 ・1枚画像をカラー化する
 
 ```bash
-python3 test_image.py--dataroot None --name Data_edges --model pix2pix --direction BtoA --crop_size 512or256 --load_size 512or256
+python3 test_image.py --dataroot None --name Data_edges --model pix2pix --direction BtoA --crop_size 512or256 --load_size 512or256
 ```
 
 ・複数画像のカラー化
@@ -92,7 +93,7 @@ python3 test_dir.py --dataroot None --name Data_edges --model pix2pix --directio
 ※注意!!!  
 `test_image.py-test_dir.py` と `test_realtime.py` でモデルが同じでも生成される画像が違うので注意（原因不明）
 
-## HSRを使った暗闇の中での物体把持
+## 4HSRを使った暗闇の中での物体把持
 
 ・リアルセンスカメラ起動とrqtで動いているか確認
 
