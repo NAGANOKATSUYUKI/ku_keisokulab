@@ -149,7 +149,7 @@ roslaunch pix2pix realsense_tf.launch
 ・Rviz表示
 
 ```bash
-rviz -d /home/keisoku/catkin_ws/src/hsrc/config/hsr_rviz.rviz
+rviz -d /home/keisoku/catkin_ws/src/pix2pix/config/hsr_rviz.rviz
 ```
 
 ・ロボットによる把持,回収動作
