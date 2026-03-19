@@ -120,13 +120,13 @@ print(torch.cuda.device_count())
 print(torch.cuda.get_device_name(0))
 ```
 
-## 7. 実環境メモ（2024年12月16日時点）
+## 7. 実環境メモ（2026年3月19日時点）
 
-- `nvidia-smi`: Driver `535.104.05`, CUDA `12.2`
-- `nvcc --version`: CUDA `12.2` (`V12.2.140`)
+- `nvidia-smi`: Driver `550.163.01`, CUDA `12.4`
+- `nvcc --version`: CUDA `12.4` (`V12.2.140`)
 - Python: `3.8.10`
-- PyTorch: `2.4.1+cu121`
-- GPU認識: `True`（`NVIDIA GeForce RTX 3070 Ti Laptop GPU`）
+- PyTorch: `2.4.1+cu124`
+- GPU認識: `True`（`NVIDIA GeForce RTX 4050 Ti Laptop GPU`）
 
 ## 8. 参考リンク
 

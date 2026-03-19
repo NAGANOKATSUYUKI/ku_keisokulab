@@ -114,7 +114,7 @@ rosrun pix2pix infra_depth_filtering.py
 rosrun pix2pix edges_realtime.py
 ```
 
-・必要ないなら以下
+ ・必要ないなら以下
 
 ```bash
 rosrun pix2pix infra2rgb.py
@@ -149,7 +149,7 @@ roslaunch pix2pix realsense_tf.launch
 ・Rviz表示
 
 ```bash
-rviz -d /home/keisoku/catkin_ws/src/pix2pix/config/hsr_rviz.rviz
+rviz -d /src/pix2pix/config/hsr_rviz.rviz
 ```
 
 ・ロボットによる把持,回収動作
